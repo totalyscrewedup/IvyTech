@@ -1,13 +1,13 @@
 """
 Program: MyProgram.py
 Author: Tomi Simic
-Last date modified: 2024-02-24
+Last date modified: 2024-02-29
 This program is to be used for Assignment 2 in Module 06. It's an expansion on
 final project, so it will start by displaying a new window.
 """
 # Import Tkinter
 # Import other modules as needed
-# Create sqlite3 database to store dates, runs, and pets
+# Create a class with sqlite3 database to store dates, runs, and pets
 # Default window Class
 # Entry box window function
 # Main function
@@ -28,8 +28,20 @@ def today():
 
 
 # Class that hold functions to handle entry data into database:
-def db():
-    pass
+class DB:
+    """Establishes a connection and handles retrival and saving of data"""
+
+    def __init__(self):
+        """Establishing connection to the database"""
+        self.connection = sqlite3.connect("FurBaby_DB.db")
+        self.cursor = self.connection.cursor()
+
+    def save_to_db(self):
+        """Saving changes to the database and closing connection"""
+        pass
+
+        # Closing connection once completed
+        # self.connection.close()
 
 # Function used as a jump box holding all names of suites:
 
