@@ -7,12 +7,29 @@ final project, so it will start by displaying a new window.
 """
 # Import Tkinter
 # Import other modules as needed
+# Create sqlite3 database to store dates, runs, and pets
 # Default window Class
+# Entry box window function
 # Main function
 
 # Importing everything from tkinter:
 import tkinter as tk
+
 # Importing other module(s) if needed:
+import datetime
+import sqlite3
+
+
+# Function that handles date and time at the pet entry:
+def today():
+    """Run on boarding time as entry time"""
+    today = datetime.date.today()
+    return today
+
+
+# Class that hold functions to handle entry data into database:
+def db():
+    pass
 
 # Function used as a jump box holding all names of suites:
 
@@ -36,17 +53,25 @@ def runs():
     }
     return runs
 
-# Leaving dormant as I cannot make it work correctly.
+
 # Child Window function:
-# class Window(tk.Toplevel):
-#     """Provides a window with details needed."""
-
-#     def __init__(self, parent):
-#         super().__init__(parent)
-
-#         self.geometry('200x120')
-#         self.title("Run details:")
-#         ttk.Button(self, text="Close", command=self.destroy).pack(expand=True)
+def get_window():
+    """Creates the second window with text entry box"""
+    # clears the textbox on click:
+    def clear_textbox(button):
+        textbox.delete("1.0", tk.END)
+    window = tk.Toplevel()
+    window.configure(height=400, width=600)
+    window.title("Run details:")
+    close = tk.Button(window, text="Close", command=window.destroy)
+    close.grid(row=1, column=0, columnspan=1)
+    # Create a textbox:
+    textbox = tk.Text(window, height=20, width=60,
+                      borderwidth=4, background="tan")
+    textbox.insert(tk.END, "Please enter boarding details here:")
+    textbox.grid(row=0, column=0)
+    # Clear the textbox on the click
+    textbox.bind("<Button-1>", clear_textbox)
 
 
 # Class that holds all parts
@@ -58,56 +83,50 @@ class App:
         self.master = master
         self.master.title("FurBabyBoarding")
 
-        def get_window():
-            # clears the textbox on click:
-            def clear_textbox(Event):
-                textbox.delete("1.0", tk.END)
-            window = tk.Toplevel()
-            window.configure(height=400, width=600)
-            window.title("Run details:")
-            close = tk.Button(window, text="Close", command=window.destroy)
-            close.grid(row=1, column=0, columnspan=1)
-            # Create a textbox:
-            textbox = tk.Text(window, height=20, width=60,
-                              borderwidth=4, background="tan")
-            textbox.insert(tk.END, "Please enter boarding details here:")
-            textbox.grid(row=0, column=0)
-            # Clear the textbox on the click
-            textbox.bind("<Button-1>", clear_textbox)
-
         # Create a button function:
+        self.row_ = 1
+        self.second_row = 1
+
         def buttoned(entry, foreground, background):
             self.button = tk.Button(self.master, text=f"{entry}", fg=f"{
                                     foreground}", bg=f"{background}", command=get_window)
-            self.button.pack()
+            # self.button.pack()
+            if self.row_ <= 5:
+                self.button.grid(row=self.row_, column=0)
+                self.row_ += 1
+            else:
+                self.button.grid(row=self.second_row, column=1)
+                self.second_row += 1
             return self.button
-
-        # Create Detail Window function: # throws missing self.
-        # def get_window(self):
-        #     second_window = Window(self)
-        #     second_window.grab_set()
 
         # Create a label
         self.label = tk.Label(self.master, text="Welcome to Hillside Animal\
  Hospital Boarding!", width=70, fg="white", bg="dark red")
-        self.label.pack()
+        self.label.grid(row=0, column=0, columnspan=2)
 
-        # Create Buttons:
+        # Create Buttons for double runs:
         self.button_1 = buttoned(f"Deluxe spots open: {
-            runs().get('DELUXE')}", "white", "dark red")
-        self.button_2 = buttoned(f"Suite spots open: {
-            runs().get('SUITE')}", "white", "dark red")
+                                 runs().get('DELUXE')}", "white", "dark red")
+        self.button_2 = buttoned(f"Suites open: {
+                                 runs().get('SUITES')}", "white", "dark red")
         self.button_3 = buttoned(f"In&Out spots open: {
-            runs().get('IN_OUT')}", "white", "dark red")
-        self.button_4 = buttoned(f"Double run spots open: {
-            runs().get('DOUBLE_RUN')}", "white", "dark red")
-        self.button_5 = buttoned(f"Regular run spots open: {
-            runs().get('REGULAR')}", "white", "dark red")
+                                 runs().get('IN_OUT')}", "white", "dark red")
+        self.button_4 = buttoned(f"Double run(s) open: {
+                                 runs().get('DOUBLE_RUN')}", "white", "dark red")
+        self.button_5 = buttoned(f"Regular run(s) open: {
+                                 runs().get('REGULAR')}", "white", "dark red")
 
-        # Used only for testing as I cannot get the Window class to work:
-        # self.random = tk.Button(
-        #     self.master, text="Testing extra window", command=get_window)
-        # self.random.pack()
+        # Create Buttons for single runs:
+        self.button_6 = buttoned(f"Large cage(s) open: {
+            runs().get('LARGE_CAGE')}", "dark red", "white")
+        self.button_7 = buttoned(f"Medium cage(s) open: {
+            runs().get('MEDIM_CAGE')}", "dark red", "white")
+        self.button_8 = buttoned(f"Cat cage(s) open: {
+            runs().get('CAT_CAGE')}", "dark red", "white")
+        self.button_9 = buttoned(f"Rabbit cage(s) open: {
+            runs().get('RABBIT_CAGE')}", "dark red", "white")
+        self.button_10 = buttoned(f"Stalls open: {
+            runs().get('STALLS')}", "dark red", "white")
 
 
 # Main function that starts the show:
