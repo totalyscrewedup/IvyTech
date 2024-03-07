@@ -175,6 +175,12 @@ class App(UserInput):
             self.master, width=54, fg="dark red", bg="white")
         self.entry_box.grid(row=1, column=1, columnspan=4)
         self.entry_box.insert(0, self.entry_text)
+        # Adding picture label:
+        self.picture_1 = ImageTk.PhotoImage(
+            Image.open("FurryResources\\PitterPatter3.jpg"))
+        self.picture_frame = tk.Label(
+            image=self.picture_1, width=200, height=200)
+        self.picture_frame.grid(row=0, column=5, rowspan=12)
 
         def buttoned(entry, padding=0):
             """Generates buttons as needed"""
