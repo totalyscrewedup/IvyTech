@@ -1,51 +1,28 @@
 """
-Program: MyProgram.py
+Program: FurBabyBoarding.py
 Author: Tomi Simic
-Last date modified: 2024-02-29
-This program is to be used for Assignment 2 in Module 06. It's an expansion on
-final project, so it will start by displaying a new window.
+Last date modified: 2024-03-09
+This program is used to keep track of available runs inside an animal boarding 
+facility. The GUI is providing the means to gather user selection while 
+the verification algorithm checks user input for typos and logical errors.
 """
 # import Tkinter
-# import other modules as needed
+# import other module(s) as needed
 # user input validation class
+# default window Class
 # class to manage scheduling
-# Create a class with sqlite3 database to store dates, runs, and pets
-# Default window Class
-# Main function
+# create a class with sqlite3 database to store dates, runs, and pets
+# main function
 
 # Importing everything from tkinter:
 import tkinter as tk
-# pip install needed for tkcalendar
-# from tkcalendar import DateEntry
 
 # Importing other module(s) if needed:
 import datetime
 from PIL import ImageTk, Image
 import sqlite3
 
-# Function used as a jump box holding all names of suites:
-
-
-# def runs():
-#     """Provides a dictonary of runs and their count."""
-#     runs = {
-#         # Spots for 2 - 3 pets:
-#         'DELUXE': 2,
-#         'SUITES': 7,
-#         'IN_OUT': 12,
-#         'DOUBLE_RUN': 4,
-#         'REGULAR': 16,
-
-#         # Spots for single pet:
-#         'LARGE_CAGE': 2,
-#         'MEDIM_CAGE': 4,
-#         'CAT_CAGE': 7,
-#         'RABBIT_CAGE': 2,
-#         'STALLS': 2
-#     }
-#     return runs
-
-# User input validation:
+# Class for user input verification
 
 
 class UserInput:
@@ -55,6 +32,7 @@ class UserInput:
         """Jumpbox for prompts needed during verification process"""
         now = datetime.datetime.now()
         prompts = {
+            "empty": "The entry was empty.",
             "dividor": "You didn't use a dash to separate month, day, and \
 year.",
             "try": "Please try again and enter correct date format.",
@@ -72,77 +50,59 @@ segments.",
         }
         return prompts
 
-    def date_format(self):
+    def date_format(self, prompt):
         """Verifying user input for correct date entry"""
         now = datetime.datetime.now()
         # Collecting date entries into single unit:
         schedule = []
-        # Starting the input loop, looking for valid data entry or restarting
-        # the loop:
-        prompt = "EMPTY"
-        while prompt == "EMPTY":
-            # Providing prompt with an example that stays current:
-            prompt = input(f"When is the client checking out? (i.e.: {now.month}-\
-{now.day + 5}-{now.year})> ")
-            print(prompt)
-            # Checking for correct separator:
-            if '-' not in prompt:
-                print(self.prompts().get('dividor'), self.prompts().get('try'))
-                prompt = "EMPTY"
+        # Check for empty entry:
+        if prompt == "":
+            return f"{self.prompts().get('empty')} {self.prompts().get('try')}"
+        # Checking for correct separator:
+        elif '-' not in prompt:
+            return f"{self.prompts().get('dividor')} {self.prompts().get('try')}"
+        else:
+            # Checking for correct count of values entered:
+            if len(prompt.split('-')) < 3:
+                return f"{self.prompts().get('wrong')} {self.prompts().get('try')}"
             else:
-                # Checking for correct count of values entered:
-                if len(prompt.split('-')) < 3:
-                    print(self.prompts().get('wrong'),
-                          self.prompts().get('try'))
-                    prompt = "EMPTY"
+                # Separating user's input into year, month, and day:
+                month, day, year = prompt.split('-')
+                # Verifying the user is using only numbers in date entry:
+                if month.isnumeric() is False or day.isnumeric() is False \
+                        or year.isnumeric() is False:
+                    return f"{self.prompts().get('no_number')} {self.prompts().get('try')}"
+                # Verifying the upper limit for month and day
+                elif int(month) > 12:
+                    return f"{self.prompts().get('bad_month')} {self.prompts().get('try')}"
+                elif int(day) > 31:
+                    return f"{self.prompts().get('bad_day')} {self.prompts().get('try')}"
+                # Verifying the date wasn't entered in the past
+                elif int(year) < now.year:
+                    return f"{self.prompts().get('bad_year')} {self.prompts().get('try')}"
+                elif int(month) < now.month:
+                    return f"{self.prompts().get('old_month')} {self.prompts().get('try')}"
+                elif int(day) < now.day:
+                    return f"{self.prompts().get('old_day')} {self.prompts().get('try')}"
                 else:
-                    # Separating user's input into year, month, and day:
-                    month, day, year = prompt.split('-')
-                    # Verifying the user is using only numbers in date entry:
-                    if month.isnumeric() is False or day.isnumeric() is False \
-                            or year.isnumeric() is False:
-                        print(self.prompts().get('no_number'),
-                              self.prompts().get('try'))
-                        prompt = "EMPTY"
-                    # Verifying the upper limit for month and day
-                    elif int(month) > 12:
-                        print(self.prompts().get('bad_month'),
-                              self.prompts().get('try'))
-                        prompt = "EMPTY"
-                    elif int(day) > 31:
-                        print(self.prompts().get('bad_day'),
-                              self.prompts().get('try'))
-                        prompt = "EMPTY"
-                    # Verifying the date wasn't entered in the past
-                    elif int(year) < now.year:
-                        print(self.prompts().get('bad_year'),
-                              self.prompts().get('try'))
-                        prompt = "EMPTY"
-                    elif int(month) < now.month:
-                        print(self.prompts().get('old_month'),
-                              self.prompts().get('try'))
-                        prompt = "EMPTY"
-                    elif int(day) < now.day:
-                        print(self.prompts().get('old_day'),
-                              self.prompts().get('try'))
-                        prompt = "EMPTY"
-                    else:
-                        # Populating the list holding individual values:
-                        schedule.append(year)
-                        schedule.append(month)
-                        schedule.append(day)
+                    # Populating the list holding individual values:
+                    schedule.append(year)
+                    schedule.append(month)
+                    schedule.append(day)
         return schedule
 
 
 # Class that holds all parts
 class App(UserInput):
     """The class holding all GUI components"""
+    # Setting up main window:
 
     def __init__(self, master):
         super().__init__()
         self.master = master
         self.master.title("FurBabyBoarding")
         self.master.iconbitmap("FurryResources\\Fbb.ico")
+        # Dicitionary to hold default boarding spots and their counts
         self.runs = {
             # Spots for 2 - 3 pets:
             'DELUXE': 2,
@@ -158,11 +118,8 @@ class App(UserInput):
             'RABBIT_CAGE': 2,
             'STALLS': 2
         }
-
-        # Create a button function:
-        self.row_ = 2
-        self.second_row = 2
-
+        self.row_ = 2   # variable used as starting point for button/field setup
+        self.second_row = 2  # variable used as starting point for button/field setup
         # Create a label
         self.entry_text = "Welcome to FurBaby Boarding!"
         self.label = tk.Label(
@@ -171,46 +128,74 @@ class App(UserInput):
         self.entry_id_label = tk.Label(
             self.master, text="Main Display. Click on it to type:")
         self.entry_id_label.grid(row=1, column=0)
+        self.cozy = tk.Label(
+            self.master, text="Our furry family greets you!", fg="dark red")
+        self.cozy.grid(row=2, column=5)
+        # Default entry box used as display and user input collection:
         self.entry_box = tk.Entry(
-            self.master, width=54, fg="dark red", bg="white")
+            self.master, width=100, fg="dark red", bg="white")
         self.entry_box.grid(row=1, column=1, columnspan=4)
         self.entry_box.insert(0, self.entry_text)
         # Adding picture label:
         self.picture_1 = ImageTk.PhotoImage(
-            Image.open("FurryResources\\PitterPatter3.jpg"))
+            Image.open("FurryResources\\Puppies1.jpg"))
         self.picture_frame = tk.Label(
             image=self.picture_1, width=200, height=200)
-        self.picture_frame.grid(row=0, column=5, rowspan=12)
+        self.picture_frame.grid(row=3, column=5, pady=5, rowspan=4)
+        self.picture_2 = ImageTk.PhotoImage(
+            # Used with help window
+            Image.open("FurryResources\\PitterPatter3.jpg"))
 
         def buttoned(entry, padding=0):
             """Generates buttons as needed"""
             self.button = tk.Button(self.master, padx=padding, text=f"{
                                     entry}", fg=f"white", bg=f"dark red")
-
+            # Creating left buttons:
             if self.row_ <= 6:
                 self.button.grid(row=self.row_, column=0, sticky="w")
                 self.row_ += 1
+            # Creating right buttons:
             else:
                 self.button.grid(row=self.second_row, column=3, sticky="e")
                 self.second_row += 1
             return self.button
 
-        # Create Buttons for double runs:
+        # Create Buttons for double runs & reconfigure them:
         self.button_1 = buttoned("DELUXE spots open", 4)
         self.button_1.configure(
-            command=lambda m=f'DELUXE': self.reaction(m, self.field_1))
+            command=lambda m='DELUXE': self.reaction(m, self.field_1))
         self.button_2 = buttoned("Suites open", 22)
+        self.button_2.configure(
+            command=lambda m='SUITES': self.reaction(m, self.field_2))
         self.button_3 = buttoned("In&Out spots open", 2)
+        self.button_3.configure(
+            command=lambda m='IN_OUT': self.reaction(m, self.field_3))
         self.button_4 = buttoned("Double run(s) open", 2)
+        self.button_4.configure(
+            command=lambda m='DOUBLE_RUN': self.reaction(m, self.field_4))
         self.button_5 = buttoned("Regular run(s) open", 1)
-
-        # Create Buttons for single runs:
+        self.button_5.configure(
+            command=lambda m='REGULAR': self.reaction(m, self.field_5))
+        # Create Buttons for single runs & reconfigure them:
         self.button_6 = buttoned("Large cage(s) open", 8)
+        self.button_6.configure(
+            command=lambda m='LARGE_CAGE': self.reaction(m, self.field_6))
         self.button_7 = buttoned("Medium cage(s) open")
+        self.button_7.configure(
+            command=lambda m='MEDIM_CAGE': self.reaction(m, self.field_7))
         self.button_8 = buttoned("Cat cage(s) open", 14)
+        self.button_8.configure(
+            command=lambda m='CAT_CAGE': self.reaction(m, self.field_8))
         self.button_9 = buttoned("Rabbit cage(s) open", 6)
+        self.button_9.configure(
+            command=lambda m='RABBIT_CAGE': self.reaction(m, self.field_9))
         self.button_10 = buttoned("Stalls open", 30)
-
+        self.button_10.configure(
+            command=lambda m='STALLS': self.reaction(m, self.field_10))
+        # Create Return Button
+        self.return_button = tk.Button(
+            self.master, width=15, text="Enter", state="disabled")
+        self.return_button.grid(row=1, column=5)
         # Create a label function:
         self.row_ = 2
         self.second_row = 2
@@ -228,7 +213,7 @@ class App(UserInput):
                 self.field.grid(row=self.second_row, column=4, sticky="e")
                 self.second_row += 1
             return self.field
-
+        # Creating fields to correspond to buttons:
         self.field_1 = fielded(f"{self.runs.get('DELUXE')}")
         self.field_2 = fielded(f"{self.runs.get('SUITES')}")
         self.field_3 = fielded(f"{self.runs.get('IN_OUT')}")
@@ -252,42 +237,51 @@ class App(UserInput):
 
     def reaction(self, clicked, field):
         """Enables field to enter checkout date"""
-        # Clear entry box when needed:
         def clear_entry(button):
+            """Clear entry box when needed"""
             self.entry_box.delete(0, tk.END)
-        self.entry_box.delete(0, tk.END)
+
+        def processing_input():
+            """Funnels user's input to verificaiton function and evaluates it"""
+            entered = self.entry_box.get()  # Retrieve user's input
+            verified = self.date_format(entered)  # Evaluate the input
+            # Display message based on issue isolated:
+            if isinstance(verified, str):
+                clear_entry(None)
+                self.entry_box.insert(0, verified)
+                self.entry_box.bind("<Button-1>", clear_entry)
+            # Forward user's input after validation
+            else:
+                clear_entry(None)
+                date = f"{verified[1]}/{verified[2]}/{verified[0]}"
+                self.entry_box.insert(0, f"Date Entered: {date}")
+                # self.entry_box.insert(0, f"Date Entered: {verified}")
+                self.get_window()  # Calling the box entry widget
+        # Evaluating if runs are available for the selection:
+        clear_entry(None)
         entry = self.spots_available(clicked, field)
+        # Processing selection if runs available:
         if entry != "No spots available!!!":
-            self.entry_box.delete(0, tk.END)
+            clear_entry(None)
             self.entry_box.insert(0, UserInput().prompts().get('ask'))
             self.entry_box.bind("<Button-1>", clear_entry)
+            self.return_button.configure(
+                state="active", background="dark red", fg="white", command=processing_input)
+        # Displaying message that no runs are available if it applies:
         else:
             self.entry_box.insert(0, entry)
 
     def spots_available(self, clicked, field):
         """Checks and modifies run availability"""
         count = self.runs.get(clicked)
+        # Checking dictionary for open runs:
         if count > 0:
             self.runs[clicked] = count - 1
-            print(self.runs.get(clicked))
             field.delete(0, tk.END)
             field.insert(0, self.runs.get(clicked))
             return self.runs.get(clicked)
         self.entry_box.configure(background="yellow")
         return "No spots available!!!"
-
-    def get_help(self):
-        """Opens the READme.txt file as GUI's internal help"""
-        with open("FurryResources\\READme.txt", "r", encoding="UTF-8") as manual:
-            text = manual.read()
-        help = tk.Toplevel()
-        help.title("Getting started & help")
-        help.iconbitmap("FurryResources\\Fbb.ico")
-        close = tk.Button(help, text="Close", command=help.destroy)
-        close.grid(row=1, column=0, columnspan=1)
-        instructions = tk.Text(help, background="tan")
-        instructions.insert(tk.END, text)
-        instructions.grid(row=0, column=0)
 
     # Child Window function:
 
@@ -295,23 +289,48 @@ class App(UserInput):
         """Creates the second window with text entry box"""
         # clears the textbox on click:
         def clear_textbox(button):
+            """Clear textbox when needed"""
             textbox.delete("1.0", tk.END)
+        # Creating new window instance to collect user comments on check-in
         window = tk.Toplevel()
         window.configure(height=400, width=600)
         window.title("Run details:")
         window.iconbitmap("FurryResources\\Fbb.ico")
-        close = tk.Button(window, text="Close", command=window.destroy)
-        close.grid(row=1, column=0, columnspan=1)
+        # To be changed from destroy to save once DB is established
+        save = tk.Button(window, text="Save", command=window.destroy)
+        save.grid(row=1, column=0, columnspan=1)
         # Create a textbox:
         textbox = tk.Text(window, height=20, width=60, background="tan")
         textbox.insert(tk.END, f"Today's date and time is: {
             Schedule().today()}. Please enter boarding details here:")
         textbox.grid(row=0, column=0)
         # Clear the textbox on the click
+        # Turning display field into input field
         textbox.bind("<Button-1>", clear_textbox)
 
+    def get_help(self):
+        """Opens the READme.txt file as GUI's internal help"""
+        help = tk.Toplevel()
+        help.title("Getting started & help")
+        help.iconbitmap("FurryResources\\Fbb.ico")
+        # Importing READme.txt as help window prompt:
+        with open("FurryResources\\READme.txt", "r", encoding="UTF-8") as manual:
+            text = manual.read()
+        # Close the button:
+        close = tk.Button(help, text="Close", command=help.destroy)
+        close.grid(row=1, column=0)
+        # Injecting the imported text into the textbox:
+        instructions = tk.Text(help, background="tan")
+        instructions.insert(tk.END, text)
+        instructions.grid(row=0, column=0)
+        # Injecting picture into the textbox:
+        picture_frame_2 = tk.Label(help, image=self.picture_2)
+        picture_frame_2.grid(row=0, column=0, sticky="nw")
 
-# Function that handles date and time at the pet entry:
+# Functions to be used in next step of application's evolution:
+# Class that handles date and time at the pet entry:
+
+
 class Schedule:
     """Provides current time and definitions needed to calculate run availability"""
 
@@ -325,11 +344,14 @@ class Schedule:
         return now_rounded
 
     def checking_in(self):
+        """Provide means to evaluate check in"""
         self.check_in = input("When is the client checking out?")
         self.scheduled_checkout = self.check_in - self.now
 
     def checking_out(self):
+        """Provide means to evaluate check out"""
         pass
+    # To be used for testing
 
     def __str__(self):
         return str(self.today())
